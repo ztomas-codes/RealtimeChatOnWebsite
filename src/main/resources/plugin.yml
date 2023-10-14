@@ -1,0 +1,8 @@
+name: ChatWebModerating
+version: '${project.version}'
+main: ztomas.me.chatwebmoderating.ChatWebModerating
+api-version: 1.20
+commands:
+  chathistory:
+    description: Shows chat history
+    usage: /<command> <player>

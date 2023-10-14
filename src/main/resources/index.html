@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+
+            body {
+                background-color: #1a1a1a;
+                color: #fff;
+            }
+
+            #playerList {
+                list-style-type: none;
+                margin: 0;
+                padding: 0;
+            }
+
+            #playerList li {
+                padding: 10px;
+                margin-bottom: 5px;
+                background-color: #333;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+
+            #playerList li:hover {
+                background-color: #555;
+            }
+    </style>
+
+    <title>ChatModeration | Chat History</title>
+</head>
+<body>
+
+    <ul id="playerList">
+    </ul>
+
+    <div>
+        <h1>Chat History</h1>
+        <p>Selected Player: <span id="selectedPlayer" style="color:indianred"></span></p>
+        <div id="chatHistory">
+
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha512-3gJwYpMe3QewGELv8k/BX9vcqhryRdzRMxVfq6ngyWXwo03GFEzjsUm8Q7RZcHPHksttq7/GFoxjCVUjkjvPdw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+        const server = "localhost";
+        const port = 9586;
+
+        var selectedPlayer = null;
+
+        loadPlayers();
+
+        document.getElementById("playerList").addEventListener("click", (e) => {
+            selectedPlayer = e.target.innerHTML;
+            document.getElementById("selectedPlayer").innerHTML = selectedPlayer;
+            updateChatHistoryForSelectedPlayer();
+        });
+
+        setInterval(() => {
+            if(selectedPlayer != null) {
+                updateChatHistoryForSelectedPlayer();
+            }
+        },4000);
+
+        function updateChatHistoryForSelectedPlayer()
+        {
+            var xhttp = new XMLHttpRequest();
+
+            var chatHistory = document.getElementById("chatHistory");
+
+
+            const url = `http://${server}:${port}/messages/` + selectedPlayer;
+            xhttp.open("GET", url, true);
+            xhttp.send();
+            xhttp.onload = () => {
+
+                var content = "";
+
+                const messages = JSON.parse(xhttp.responseText);
+                messages.forEach(message => {
+                    content += "<p><strong style='color:indianred'>"+ message.date +"</strong> " + message.message + "</p>";
+                });
+
+                chatHistory.innerHTML = content;
+            }
+        }
+        function loadPlayers()
+        {
+            const url = `http://${server}:${port}/players/`;
+            var xhttp = new XMLHttpRequest();
+            xhttp.open("GET", url, true);
+
+            xhttp.send();
+
+            xhttp.onload = () => {
+                console.log(xhttp.responseText);
+                const players = JSON.parse(xhttp.responseText);
+                console.log(players);
+                const playerList = document.getElementById("playerList");
+                players.forEach(player => {
+                    const li = document.createElement("li");
+                    li.innerHTML = player.username;
+                    playerList.appendChild(li);
+                });
+            }
+        }
+
+    </script>
+</body>
+</html>
